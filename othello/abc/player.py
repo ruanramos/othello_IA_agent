@@ -7,12 +7,12 @@ import typing_extensions as Te
 if T.TYPE_CHECKING:
     # Project
     from ..enums import Color
-    from ..models import Board, Position
+    from ..models import Board
 
 
 @Te.runtime
 class PlayerProtocol(Te.Protocol):
-    def play(self, __board: "Board", **__kwargs: T.Any) -> "Position":
+    def play(self, __board: "Board", **__kwargs: T.Any) -> T.Tuple[int, int]:
         ...
 
 

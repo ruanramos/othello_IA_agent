@@ -1,16 +1,24 @@
 # Internal
 import typing as T
-from pkgutil import ModuleInfo, iter_modules
+from os import path
+from pkgutil import ModuleInfo, walk_packages
 from importlib.util import module_from_spec
 
 # Project
-from ..protocol import PlayerProtocol
-
-PLAYER_MODULE = "models/players"
+from ..abc import PlayerProtocol
 
 
-def available_players(path: T.Optional[T.Sequence[str]] = None) -> T.Sequence[ModuleInfo]:
-    return tuple(iter_modules(path=path or (PLAYER_MODULE,)))
+def available_players(player_paths: T.Optional[T.Sequence[str]] = None) -> T.Sequence[ModuleInfo]:
+    import othello
+
+    module_path = othello.__path__  # type: ignore  # mypy issue #1422
+
+    return (
+        *walk_packages(
+            (path.join(p, "models", "players") for p in module_path), onerror=lambda _: None,
+        ),
+        *(walk_packages(player_paths, onerror=lambda _: None) if player_paths else tuple()),
+    )
 
 
 def import_player(player_importer: ModuleInfo) -> T.Type[PlayerProtocol]:
@@ -35,3 +43,9 @@ def import_player(player_importer: ModuleInfo) -> T.Type[PlayerProtocol]:
         raise ImportError(f"Failed to import player class from module: {module_name}") from None
 
     return player_cls
+
+
+__all__ = (
+    "import_player",
+    "available_players",
+)

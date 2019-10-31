@@ -1,32 +1,38 @@
 # Internal
+import sys
 import typing as T
 
-# External
-from othello.enums import Color
-
 # Project
+from ..abc import AbstractView, ColoredPlayerProtocol
+from ..enums import Color
 from ..adapters import BoardAdapter
-from ..protocol import ViewProtocol, ColoredPlayerProtocol
 from ..misc.runtime_importer import import_player, available_players
 
 
-class ConsoleView(ViewProtocol):
-    def __init__(
-        self, player_paths: T.Optional[T.Sequence[str]] = None, automatic: bool = False
-    ) -> None:
-        self.automatic = automatic
-        self.player_paths = player_paths or tuple()
-
+class ConsoleView(AbstractView):
     @staticmethod
     def print_view_data(adapter: BoardAdapter) -> None:
         print("┌─────────────────────┐")
-        print("│     a b c d e f g h │")
+        print("│     1 2 3 4 5 6 7 8 │")
         print("├───┬─────────────────┤")
 
         for i, column in enumerate(adapter.view_data):
-            print(f"│ {i} │ " + " ".join(v.value for v in column) + " │")
+            print(f"│ {i + 1} │ " + " ".join(v.value for v in column) + " │")
 
         print("└───┴─────────────────┘")
+
+    class Model(AbstractView.Model["ConsoleView"]):
+        def show(self, view: "ConsoleView") -> T.Sequence[T.Optional[str]]:
+            print(self._title)
+            result: T.List[T.Optional[str]] = []
+            for name, data in self._structure:
+                if name == "paragraph":
+                    view.print(data["text"])
+                    result.append(None)
+                elif name == "input":
+                    result.append(view.input(data["label"]))
+
+            return result
 
     def loop(self) -> None:
         print(
@@ -39,15 +45,15 @@ class ConsoleView(ViewProtocol):
         )
 
         colors = {Color.BLACK: "preto", Color.WHITE: "branco"}
-        players: T.List[ColoredPlayerProtocol] = []
-        all_players = available_players()
+        players: T.List["ColoredPlayerProtocol"] = []
+        all_players = available_players(self.player_paths)
         for i, (color, name) in enumerate(colors.items()):
             print(f"Selecione um dos players abaixo para ser o jogador {name}")
 
             for idx, player_info in enumerate(all_players):
                 print(f"{idx} - {player_info.name}")
 
-            player_cls: T.Type[ColoredPlayerProtocol] = import_player(  # type: ignore
+            player_cls: T.Type["ColoredPlayerProtocol"] = import_player(  # type: ignore
                 all_players[int(input("Digite o numero do player que voce deseja: "))]
             )
 
@@ -67,7 +73,7 @@ class ConsoleView(ViewProtocol):
                 print(f"Sem movimentos para o jogador {colors[color]}")
                 continue
 
-            print(f"Jogador: {colors[color]}")
+            print(f"Jogador: {colors[color]} ({color.value})")
             print(
                 (
                     "Score: "
@@ -86,8 +92,11 @@ class ConsoleView(ViewProtocol):
                 f"Jogador {colors[Color.BLACK] if scores[Color.BLACK] > scores[Color.WHITE] else colors[Color.WHITE]} Ganhou"
             )
 
-    def alert(self, msg: str) -> None:
+    def print(self, msg: str) -> None:
         print(msg)
+
+    def alert(self, msg: str) -> None:
+        print(msg, file=sys.stderr)
 
     def input(self, msg: str) -> str:
         return input(f"{msg}: ")

@@ -4,19 +4,22 @@ import typing as T
 if T.TYPE_CHECKING:
     # Project
     from ...enums import Color
-    from ...models import Board, Position
-    from ...protocol import ViewProtocol
+    from ...models import Board
+    from ...abc import AbstractView
 
 
 class HumanPlayer:
     def __init__(self, color: "Color") -> None:
         self.color = color
 
-    def play(self, board: "Board", view: "ViewProtocol") -> "Position":
+    def play(self, board: "Board", view: "AbstractView") -> T.Tuple[int, int]:
         while True:
-            row_inp = int(input("Linha"))
-            col_inp = int(input("Coluna"))
-            move = Position(row_inp, col_inp)
+            model = view.Model(f"Próximo movimento do Jogador ({self.color.value})")
+            model.add_input("Linha")
+            model.add_input("Coluna")
+            row_inp, col_inp = model.show(view)
+
+            move = (int(row_inp), int(col_inp))
 
             if move in board.valid_moves(self.color):
                 break

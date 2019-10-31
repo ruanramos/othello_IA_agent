@@ -1,11 +1,28 @@
 # Internal
 import typing as T
+from argparse import ArgumentParser
 
 # External
+from othello.abc import AbstractView
 from othello.views import ConsoleView
-from othello.protocol import ViewProtocol
 
-view_whitelist: T.Dict[str, T.Type[ViewProtocol]] = {"console": ConsoleView}
+view_whitelist: T.Dict[str, T.Type[AbstractView]] = {"console": ConsoleView}
+
+
+arg_parser = ArgumentParser(description="Jogue Othello")
+arg_parser.add_argument(
+    "player_paths",
+    type=str,
+    help="Lista de caminhos para pastas com definições de jogadores em python",
+    nargs="*",
+    metavar="PATHS",
+)
+arg_parser.add_argument(
+    "--automatic",
+    dest="automatic",
+    help="Passa para próxima jogada automaticamente",
+    action="store_true",
+)
 
 
 def main(
@@ -17,4 +34,8 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main(**vars(arg_parser.parse_args()))
+    except KeyboardInterrupt:
+        print()
+        pass

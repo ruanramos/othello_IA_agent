@@ -15,13 +15,13 @@ BoardState_t = T.MutableMapping[T.Tuple[int, int], Color]
 
 class Board:
     # Maintain compatibility with old version
-    EMPTY, BLACK, WHITE, OUTER = Color  # type: ignore
+    EMPTY, BLACK, WHITE, OUTER = Color  # type: ignore  # mypy issue #2305
 
     DIRECTIONS = UP, DOWN, LEFT, RIGHT, UP + LEFT, UP + RIGHT, DOWN + LEFT, DOWN + RIGHT
 
     @staticmethod
     def positions() -> T.Iterator[T.Tuple[int, int]]:
-        return product(range(1, 9), repeat=2)  # type: ignore
+        return product(range(1, 9), repeat=2)  # type: ignore # typeshed is too generic here
 
     def __init__(self, board: T.Optional[BoardState_t]) -> None:
         self._board: BoardState_t = defaultdict(lambda: Color.OUTER)
@@ -58,7 +58,7 @@ class Board:
     def __setitem__(self, item: T.Tuple[int, int], value: Color) -> None:
         self._board[item] = value
 
-    def play(self, move: Position, color: Color) -> None:
+    def play(self, move: T.Tuple[int, int], color: Color) -> None:
         assert color == Color.BLACK or color == Color.WHITE
 
         self[move] = color
@@ -89,22 +89,22 @@ class Board:
                         ret.append(move)
         return tuple(ret)
 
-    def _make_flips(self, move: Position, color: Color, direction: Position) -> None:
+    def _make_flips(self, move: T.Tuple[int, int], color: Color, direction: Position) -> None:
         bracket = self._find_bracket(move, color, direction)
 
         if not bracket:
             return
 
         # flips
-        square_pos = move + direction
+        square_pos = direction + move
         while square_pos != bracket:
             self[square_pos] = color
             square_pos += direction
 
     def _find_bracket(
-        self, move: Position, color: Color, direction: Position
+        self, move: T.Tuple[int, int], color: Color, direction: Position
     ) -> T.Optional[Position]:
-        bracket_pos = move + direction
+        bracket_pos = direction + move
         bracket_color = self[bracket_pos]
 
         if bracket_color == color:

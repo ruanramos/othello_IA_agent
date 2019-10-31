@@ -1,3 +1,3 @@
 # Project
-from .view import ViewProtocol
+from .view import AbstractView
 from .player import PlayerProtocol, ColoredPlayerProtocol
