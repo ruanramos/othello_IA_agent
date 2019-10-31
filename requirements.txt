@@ -1,0 +1,3 @@
+importlib_metadata
+typing_extensions
+dataclasses >= 0.6; python_version < "3.7"
