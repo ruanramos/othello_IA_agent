@@ -17,20 +17,22 @@ view_list: T.Dict[str, T.Sequence[T.Type[AbstractView]]] = {
     "console": (ConsoleView,),
 }
 
-arg_parser = ArgumentParser(description="Jogue Othello")
+arg_parser = ArgumentParser(description="Simula partidas do jogo Otello")
 arg_parser.add_argument(
     "player_paths",
     type=str,
-    help="Lista de caminhos para pastas com definições de jogadores em python",
+    help="Lista de caminhos para pastas ou arquivos contendo definições de jogadores em python",
     nargs="*",
-    metavar="PATHS",
+    metavar="CAMINHO",
 )
 arg_parser.add_argument(
-    "--automatic",
+    "--automatico",
     dest="automatic",
     help="Passa para próxima jogada automaticamente",
     action="store_true",
 )
+
+is_debug = "OTHELLO_DEBUG" in environ
 
 
 def main(view_type: str) -> None:
@@ -57,7 +59,12 @@ def main_gui() -> Te.NoReturn:
         main("gui")
     except BaseException as exc:
         gui_error(error_msg(exc))
+
+        if is_debug:
+            raise
+
         sys.exit(error_msg(exc))
+
     sys.exit(0)
 
 
@@ -65,6 +72,9 @@ def main_console() -> Te.NoReturn:
     try:
         main("console")
     except BaseException as exc:
+        if is_debug:
+            raise
+
         sys.exit(error_msg(exc))
 
     sys.exit(0)
@@ -78,6 +88,10 @@ if __name__ == "__main__":
     except BaseException as exc:
         if view_type == "gui":
             gui_error(error_msg(exc))
+
+        if is_debug:
+            raise
+
         sys.exit(error_msg(exc))
 
     sys.exit(0)

@@ -19,7 +19,7 @@ class ConsoleView(AbstractView):
         for i, column in enumerate(adapter.view_data):
             print(f"│ {i + 1} │ " + " ".join(v.value for v in column) + " │")
 
-        print("└───┴─────────────────┘")
+        print("└───┴─────────────────┘\n")
 
     class Model(AbstractView.Model["ConsoleView"]):
         def show(self, view: "ConsoleView") -> T.Sequence[T.Optional[str]]:
@@ -52,19 +52,32 @@ class ConsoleView(AbstractView):
         players: T.List["ColoredPlayerProtocol"] = []
         all_players = available_players(self.player_paths)
         for i, (color, name) in enumerate(colors.items()):
-            print(f"Selecione um dos players abaixo para ser o jogador {name}")
+            while True:
+                print(f"Selecione um dos players abaixo para ser o jogador {name}")
 
-            for idx, player_info in enumerate(all_players):
-                print(f"{idx} - {player_info.name}")
+                for idx, player_info in enumerate(all_players):
+                    print(f"{idx} - {player_info.name}")
+
+                try:
+                    chosen_pos = int(self.input("Digite o numero do player que voce deseja"))
+                except ValueError:
+                    self.alert("Escolha deve ser um inteiro")
+                    continue
+
+                if 0 <= chosen_pos < len(all_players):
+                    break
+
+                self.alert("Escolha inválida")
 
             player_cls: T.Type["ColoredPlayerProtocol"] = import_player(  # type: ignore
-                all_players[int(input("Digite o numero do player que voce deseja: "))]
+                all_players[chosen_pos]
             )
 
             player = player_cls(color)
             assert hasattr(player, "color")
 
             players.append(player)
+            print()
 
         adapter = BoardAdapter(*players)
         self.print_view_data(adapter)

@@ -6,9 +6,7 @@ from collections import defaultdict
 # Project
 from ..enums import Color
 from .position import Position
-
-# Basic directions
-UP, DOWN, LEFT, RIGHT = Position(-1, 0), Position(1, 0), Position(0, -1), Position(0, 1)
+from ..misc.line_view import LineView
 
 BoardState_t = T.MutableMapping[T.Tuple[int, int], Color]
 
@@ -17,7 +15,10 @@ class Board:
     # Maintain compatibility with old version
     EMPTY, BLACK, WHITE, OUTER = Color  # type: ignore  # mypy issue #2305
 
-    DIRECTIONS = UP, DOWN, LEFT, RIGHT, UP + LEFT, UP + RIGHT, DOWN + LEFT, DOWN + RIGHT
+    # Basic directions
+    UP, DOWN, LEFT, RIGHT = Position(-1, 0), Position(1, 0), Position(0, -1), Position(0, 1)
+    UP_RIGHT, DOWN_RIGHT, DOWN_LEFT, UP_LEFT = UP + RIGHT, DOWN + RIGHT, DOWN + LEFT, UP + LEFT
+    DIRECTIONS = UP, UP_RIGHT, RIGHT, DOWN_RIGHT, DOWN, DOWN_LEFT, LEFT, UP_LEFT
 
     @staticmethod
     def positions() -> T.Iterator[T.Tuple[int, int]]:
@@ -35,12 +36,12 @@ class Board:
         else:
             self._board.update(board.items())
 
-    def __iter__(self) -> T.Iterator[T.Tuple[Color, ...]]:
+    def __iter__(self) -> T.Iterator[T.MutableSequence[Color]]:
         for i in range(0, 10):
             yield self[i]
 
     @T.overload
-    def __getitem__(self, item: int) -> T.Tuple[Color, ...]:
+    def __getitem__(self, item: int) -> T.MutableSequence[Color]:
         ...
 
     @T.overload
@@ -49,17 +50,17 @@ class Board:
 
     def __getitem__(
         self, item: T.Union[int, T.Tuple[int, int]]
-    ) -> T.Union[T.Tuple[Color, ...], Color]:
+    ) -> T.Union[T.MutableSequence[Color], Color]:
         if isinstance(item, int):
-            return tuple(self[item, j] for j in range(0, 10))
+            return LineView(item, self._board)
 
         return self._board[item]
 
-    def __setitem__(self, item: T.Tuple[int, int], value: Color) -> None:
-        self._board[item] = value
+    def __setitem__(self, item: T.Tuple[int, int], value: T.Union[Color, str]) -> None:
+        self._board[item] = Color(value)
 
-    def play(self, move: T.Tuple[int, int], color: Color) -> None:
-        assert color == Color.BLACK or color == Color.WHITE
+    def play(self, move: T.Tuple[int, int], color: T.Union[Color, str]) -> None:
+        assert Color.BLACK == color or Color.WHITE == color
 
         self[move] = color
 
@@ -71,6 +72,10 @@ class Board:
         # Maintain compatibility with old version
         return self
 
+    def get_square_color(self, l: int, c: int) -> Color:
+        # Maintain compatibility with old version
+        return self.board[l, c]
+
     def score(self) -> T.Tuple[int, int]:
         white = sum(1 for i, j in self.positions() if self[i, j] == Color.WHITE)
         black = sum(1 for i, j in self.positions() if self[i, j] == Color.BLACK)
@@ -79,7 +84,7 @@ class Board:
     def get_clone(self) -> "Board":
         return Board(self._board)
 
-    def valid_moves(self, color: Color) -> T.Sequence[Position]:
+    def valid_moves(self, color: T.Union[Color, str]) -> T.Sequence[Position]:
         ret = []
         for i, j in self.positions():
             if self[i, j] == Color.EMPTY:
@@ -89,7 +94,9 @@ class Board:
                         ret.append(move)
         return tuple(ret)
 
-    def _make_flips(self, move: T.Tuple[int, int], color: Color, direction: Position) -> None:
+    def _make_flips(
+        self, move: T.Tuple[int, int], color: T.Union[Color, str], direction: Position
+    ) -> None:
         bracket = self._find_bracket(move, color, direction)
 
         if not bracket:
@@ -102,8 +109,9 @@ class Board:
             square_pos += direction
 
     def _find_bracket(
-        self, move: T.Tuple[int, int], color: Color, direction: Position
+        self, move: T.Tuple[int, int], color: T.Union[Color, str], direction: Position
     ) -> T.Optional[Position]:
+        color = Color(color)
         bracket_pos = direction + move
         bracket_color = self[bracket_pos]
 

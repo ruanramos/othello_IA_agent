@@ -1,4 +1,5 @@
 # Internal
+import typing as T
 from enum import Enum, unique
 
 
@@ -8,6 +9,14 @@ class Color(Enum):
     BLACK = "@"
     WHITE = "o"
     OUTER = "?"
+
+    def __eq__(self, other: object) -> bool:
+        ret: bool = self.value == other if isinstance(other, str) else super().__eq__(other)
+        return ret
+
+    def __hash__(self) -> int:
+        ret: int = self.value.__hash__()
+        return ret
 
     def opposite(self) -> "Color":
         if self in (Color.EMPTY, Color.OUTER):
