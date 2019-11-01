@@ -202,5 +202,6 @@ $RECYCLE.BIN/
 
 ### Project ###
 .idea/**/*
+othello/models/player/extra
 
 # End of https://www.gitignore.io/api/macos,linux,python,windows
