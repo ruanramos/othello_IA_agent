@@ -25,6 +25,11 @@ class AbstractView(metaclass=ABCMeta):
         def show(self, view: K) -> T.Sequence[T.Any]:
             ...
 
+    @classmethod
+    @abstractmethod
+    def available(cls) -> bool:
+        ...
+
     def __init__(
         self, player_paths: T.Optional[T.Sequence[str]] = None, automatic: bool = False
     ) -> None:

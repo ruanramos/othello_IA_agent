@@ -5,7 +5,7 @@ from pkgutil import ModuleInfo, walk_packages
 from importlib.util import module_from_spec
 
 # Project
-from ..abc import PlayerProtocol
+from ..abstract import PlayerProtocol
 
 
 def available_players(player_paths: T.Optional[T.Sequence[str]] = None) -> T.Sequence[ModuleInfo]:

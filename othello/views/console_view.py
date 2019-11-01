@@ -3,8 +3,8 @@ import sys
 import typing as T
 
 # Project
-from ..abc import AbstractView, ColoredPlayerProtocol
 from ..enums import Color
+from ..abstract import AbstractView, ColoredPlayerProtocol
 from ..adapters import BoardAdapter
 from ..misc.runtime_importer import import_player, available_players
 
@@ -33,6 +33,10 @@ class ConsoleView(AbstractView):
                     result.append(view.input(data["label"]))
 
             return result
+
+    @classmethod
+    def available(cls) -> bool:
+        return True
 
     def loop(self) -> None:
         print(

@@ -5,7 +5,7 @@ if T.TYPE_CHECKING:
     # Project
     from ...enums import Color
     from ...models import Board
-    from ...abc import AbstractView
+    from ...abstract import AbstractView
 
 
 class HumanPlayer:

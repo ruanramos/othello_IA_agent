@@ -3,9 +3,9 @@ import typing as T
 from inspect import signature
 
 # Project
-from ..abc import AbstractView, ColoredPlayerProtocol
 from ..enums import Color
-from ..models import Board, Position
+from ..models import Board
+from ..abstract import AbstractView, ColoredPlayerProtocol
 
 
 class Players(T.NamedTuple):
