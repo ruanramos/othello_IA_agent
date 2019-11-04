@@ -27,6 +27,7 @@ class CornerPlayer:
         self.color = color
 
     def play(self, board: "Board") -> "Position":
+        print(board.score(), self.color)
         return self.get_nearest_corner(board.valid_moves(self.color))
 
 

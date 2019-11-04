@@ -13,6 +13,8 @@ class RandomPlayer:
         self.color = color
 
     def play(self, board: "Board") -> "Position":
+        print("Possible Moves for color {}: {}".format(self.color, board.valid_moves(self.color)))
+        print("-----------------------------")
         return random.choice(board.valid_moves(self.color))
 
 

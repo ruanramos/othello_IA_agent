@@ -15,8 +15,8 @@ class HumanPlayer:
     def play(self, board: "Board", view: "AbstractView") -> T.Tuple[int, int]:
         while True:
             model = view.Model(f"Próximo movimento do Jogador ({self.color.value})")
-            model.add_input("Linha")
             model.add_input("Coluna")
+            model.add_input("Linha")
             row_inp, col_inp = model.show(view)
 
             move = (int(row_inp), int(col_inp))
