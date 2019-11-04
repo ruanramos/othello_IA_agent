@@ -48,6 +48,7 @@ def main(view_type: str) -> None:
     except KeyboardInterrupt:
         print()
         pass
+    v = input()
 
 
 def error_msg(exc: BaseException) -> str:

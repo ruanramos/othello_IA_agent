@@ -69,8 +69,6 @@ def get_a_child_board(board: "Board", color: "Color", valid_moves):
 
 
 class MiniMaxAB:
-    lulz = 0
-
     @staticmethod
     def num_of_coins_heuristic(board: "Board", color: "Color") -> float:
         actual_score = board.score()
@@ -84,13 +82,49 @@ class MiniMaxAB:
         s = board.score()
         return s[0]
 
+    def simple_mobility(self, board: "Board", color: "Color") -> float:
+        return len(board.valid_moves(color)) - len(board.valid_moves(color.opposite()))
+
+    def frontier_control(self, board: "Board", color: "Color") -> float:
+        def frontier(board: "Board"):
+            def adjacent(px: int, py: int):
+                r = []
+                for i in range(-1, 1):
+                    for j in range(-1, 1):
+                        if (i == 0 and j == 0):
+                            continue
+                        x = px + i
+                        y = py + j
+                        if x > 0 and x < 9 and y > 0 and y < 9:
+                            r.append((x, y))
+            r = []
+            for x, y in board.positions():
+                if (x == 1 or y == 1 or x == 8 or y == 8):
+                    continue
+                for a in adjacent(x, y):
+                    if board.get_square_color(a) == Color.EMPTY:
+                        r.append(a)
+                        break
+            return r
+
+        score = 0
+        for p in frontier(board):
+            pcolor = board.get_square_color(p[1], p[2])
+            if pcolor == color:
+                score -= 1
+            elif pcolor == color.opposite:
+                score += 1
+
+        return score
+
+        
+            
+
     def __init__(self, color: "Color") -> None:
         self.color = color
 
     def play(self, board: "Board") -> "Position":
-        res = minimax(board, 0, self.color, True, -math.inf, math.inf, self.num_of_coins_heuristic)
-        self.lulz += 1
-        print(self.lulz)
+        res = minimax(board, 0, self.color, True, -math.inf, math.inf, self.frontier_control)
         return res[1]
 
 
