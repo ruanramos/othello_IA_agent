@@ -129,11 +129,11 @@ class MiniMaxAB:
             for x, y in board.positions():
                 if board.get_square_color(x, y) == ".":
                     continue
-                print((x, y))
+                # print((x, y))
                 # if (x == 1 or y == 1 or x == 8 or y == 8):
                 #     continue
                 for ax, ay in adjacent(x, y):
-                    print((ax, ay))
+                    # print((ax, ay))
                     if board.get_square_color(ax, ay) == ".":
                         r.append((ax, ay))
                         break
@@ -175,7 +175,7 @@ class MiniMaxAB:
                 # print("da pra pegar esse canto", c)
                 # input()
                 return (True, c)
-        return (False, None)        
+        return (False, None)
 
     def uber_heuristic(self, board: "Board", color: "Color", turn: int) -> float:
         #End
@@ -183,7 +183,7 @@ class MiniMaxAB:
             return self.coin_parity(board, color, turn)
         #Beginning
         elif (turn < 20):
-            return self.positional_heuristic(board, color, turn)
+            return self.simple_mobility(board, color, turn)
         #Middle
         else:
             return self.positional_heuristic(board, color, turn)
@@ -212,7 +212,7 @@ class MiniMaxAB:
         elif (self.turn > 45):
             depth += math.floor((self.turn-40) / 5)
 
-        print("Turn: ",self.turn, "Depth: ", depth)
+        # print("Turn: ",self.turn, "Depth: ", depth)
         res = minimax(depth, board, 0, self.color, True, -math.inf, math.inf, self.turn, self.uber_heuristic)
         self.turn += 2
         return res[1]
